@@ -13,3 +13,8 @@ addcmd('teste',{},function(args, speaker)
 	-- códigos
 end)
 ```
+
+notificação:
+```lua
+notify('teste','teste')
+```
