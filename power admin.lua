@@ -210,7 +210,7 @@ Title.Text = "Power Admin v" .. currentVersion
 
 do
 	local emoji = ({
-		["01 01"] = "ðŸŽ†",
+		["01 01"] = "🎆",
 		[(function(Year)
 			local A = math.floor(Year/100)
 			local B = math.floor((13+8*A)/25)
@@ -227,9 +227,9 @@ do
 				return ("04 %02d"):format(G-31)
 			end
 			return ("03 %02d"):format(G)
-		end)(tonumber(os.date"%Y"))] = "Ã°Å¸Â¥Å¡",
-		["10 31"] = "ðŸŽƒ",
-		["12 25"] = "â˜ƒï¸â€ž"
+		end)(tonumber(os.date"%Y"))] = "🥚",
+		["10 31"] = "🎃",
+		["12 25"] = "🎄"
 	})[os.date("%m %d")]
 	if emoji then
 		Title.Text = ("%s %s %s"):format(emoji, Title.Text, emoji)
@@ -1926,6 +1926,7 @@ ChatService = game:GetService("Chat")
 ProximityPromptService = game:GetService("ProximityPromptService")
 StatsService = game:GetService("Stats")
 MaterialService = game:GetService("MaterialService")
+AvatarEditorService = game:GetService("AvatarEditorService")
 
 sethidden = sethiddenproperty or set_hidden_property or set_hidden_prop
 gethidden = gethiddenproperty or get_hidden_property or get_hidden_prop
@@ -4639,6 +4640,8 @@ CMDs[#CMDs + 1] = {NAME = 'norender', DESC = 'Disable 3d Rendering to decrease t
 CMDs[#CMDs + 1] = {NAME = 'render', DESC = 'Enable 3d Rendering'}
 CMDs[#CMDs + 1] = {NAME = 'use2022materials / 2022materials', DESC = 'Enables 2022 material textures'}
 CMDs[#CMDs + 1] = {NAME = 'unuse2022materials / un2022materials', DESC = 'Disables 2022 material textures'}
+CMDs[#CMDs + 1] = {NAME = 'promptr6', DESC = 'Prompts the game to switch your rig type to R6'}
+CMDs[#CMDs + 1] = {NAME = 'promptr15', DESC = 'Prompts the game to switch your rig type to R15'}
 wait()
 
 for i = 1, #CMDs do
@@ -6629,7 +6632,7 @@ addcmd('gametp',{'gameteleport'},function(args, speaker)
 	TeleportService:Teleport(args[1])
 end)
 
-addcmd('rejoin',{'rj'},function(args, speaker)
+addcmd("rejoin", {"rj"}, function(args, speaker)
 	if #Players:GetPlayers() <= 1 then
 		Players.LocalPlayer:Kick("\nRejoining...")
 		wait()
@@ -6639,24 +6642,11 @@ addcmd('rejoin',{'rj'},function(args, speaker)
 	end
 end)
 
-addcmd('autorejoin',{'autorj'},function(args, speaker)
-	local Dir = COREGUI:FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
-	Dir.DescendantAdded:Connect(function(Err)
-		if Err.Name == "ErrorTitle" then
-			Err:GetPropertyChangedSignal("Text"):Connect(function()
-				if Err.Text:sub(0, 12) == "Disconnected" then
-					if #Players:GetPlayers() <= 1 then
-						Players.LocalPlayer:Kick("\nRejoining...")
-						wait()
-						TeleportService:Teleport(PlaceId, Players.LocalPlayer)
-					else
-						TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
-					end
-				end
-			end)
-		end
+addcmd("autorejoin", {"autorj"}, function(args, speaker)
+	GuiService.ErrorMessageChanged:Connect(function()
+		execCmd("rejoin")
 	end)
-	notify('Auto Rejoin','Auto rejoin enabled')
+	notify("Auto Rejoin", "Auto rejoin enabled")
 end)
 
 addcmd('serverhop',{'shop'},function(args, speaker)
@@ -6969,7 +6959,7 @@ addcmd('fly',{},function(args, speaker)
 	end
 end)
 
-addcmd('flyspeed',{'qsp'},function(args, speaker)
+addcmd('flyspeed',{'flysp'},function(args, speaker)
 	local speed = args[1] or 1
 	if isNumber(speed) then
 		iyflyspeed = speed
@@ -8472,24 +8462,43 @@ addcmd('antiafk',{'antiidle'},function(args, speaker)
 	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('Anti Idle','Anti idle is enabled') end
 end)
 
-addcmd('datalimit',{},function(args, speaker)
+addcmd("datalimit", {}, function(args, speaker)
 	if tonumber(args[1]) then
 		NetworkClient:SetOutgoingKBPSLimit(args[1])
 	end
 end)
 
-addcmd('replicationlag',{'backtrack'},function(args, speaker)
+addcmd("replicationlag", {"backtrack"}, function(args, speaker)
 	if tonumber(args[1]) then
 		settings():GetService("NetworkSettings").IncomingReplicationLag = args[1]
 	end
 end)
 
-addcmd('noprompts', {'nopurchaseprompts'}, function(args, speaker)
+addcmd("noprompts", {"nopurchaseprompts"}, function(args, speaker)
 	COREGUI.PurchasePrompt.Enabled = false
 end)
 
-addcmd('showprompts', {'showpurchaseprompts'}, function(args, speaker)
+addcmd("showprompts", {"showpurchaseprompts"}, function(args, speaker)
 	COREGUI.PurchasePrompt.Enabled = true
+end)
+
+promptNewRig = function(speaker, rig)
+	local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+	if humanoid then
+		AvatarEditorService:PromptSaveAvatar(humanoid.HumanoidDescription, Enum.HumanoidRigType[rig])
+		local result = AvatarEditorService.PromptSaveAvatarCompleted:Wait()
+		if result == Enum.AvatarPromptResult.Success then
+			execCmd("reset")
+		end
+	end
+end
+
+addcmd("promptr6", {}, function(args, speaker)
+	promptNewRig(speaker, "R6")
+end)
+
+addcmd("promptr15", {}, function(args, speaker)
+	promptNewRig(speaker, "R15")
 end)
 
 addcmd('age',{},function(args, speaker)
@@ -8715,20 +8724,16 @@ addcmd('vehiclenoclip',{'vnoclip'},function(args, speaker)
 	end
 end)
 
-addcmd('vehicleclip',{'vclip','unvnoclip','unvehiclenoclip'},function(args, speaker)
-	execCmd('clip')
-	for i,v in pairs(vnoclipParts) do
+addcmd("vehicleclip", {"vclip", "unvnoclip", "unvehiclenoclip"}, function(args, speaker)
+	execCmd("clip")
+	for i, v in pairs(vnoclipParts) do
 		v.CanCollide = true
 	end
 	vnoclipParts = {}
 end)
 
-addcmd('togglevnoclip',{},function(args, speaker)
-	if Clip then
-		execCmd('vnoclip')
-	else
-		execCmd('vclip')
-	end
+addcmd("togglevnoclip", {}, function(args, speaker)
+	execCmd(Clip and "vnoclip" or "vclip")
 end)
 
 addcmd('clientbring',{'cbring'},function(args, speaker)
@@ -8777,7 +8782,8 @@ addcmd('loopbring',{},function(args, speaker)
 			end
 		end)
 	end
-end
+end)
+
 addcmd('unloopbring',{'noloopbring'},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players)do
@@ -9175,16 +9181,12 @@ addcmd('invisible',{'invis'},function(args, speaker)
 	notify('Invisible','You now appear invisible to other players')
 end)
 
-addcmd('visible',{'vis'},function(args, speaker)
+addcmd("visible", {"vis"}, function(args, speaker)
 	TurnVisible()
 end)
 
-addcmd('toggleinvis',{},function(args, speaker)
-	if invisRunning then
-		execCmd('visible')
-	else
-		execCmd('invisible')
-	end
+addcmd("toggleinvis", {}, function(args, speaker)
+	execCmd(invisRunning and "visible" or "invisible")
 end)
 
 addcmd('toolinvisible',{'toolinvis','tinvis'},function(args, speaker)
@@ -9226,7 +9228,7 @@ addcmd('toolinvisible',{'toolinvis','tinvis'},function(args, speaker)
 	Char:MoveTo(box.Position + Vector3.new(0,.5,0))
 end)
 
-addcmd('strengthen',{},function(args, speaker)
+addcmd("strengthen", {}, function(args, speaker)
 	for _, child in pairs(speaker.Character:GetDescendants()) do
 		if child.ClassName == "Part" then
 			if args[1] then
@@ -9238,7 +9240,7 @@ addcmd('strengthen',{},function(args, speaker)
 	end
 end)
 
-addcmd('weaken',{},function(args, speaker)
+addcmd("weaken", {}, function(args, speaker)
 	for _, child in pairs(speaker.Character:GetDescendants()) do
 		if child.ClassName == "Part" then
 			if args[1] then
@@ -9250,7 +9252,7 @@ addcmd('weaken',{},function(args, speaker)
 	end
 end)
 
-addcmd('unweaken',{'unstrengthen'},function(args, speaker)
+addcmd("unweaken", {"unstrengthen"}, function(args, speaker)
 	for _, child in pairs(speaker.Character:GetDescendants()) do
 		if child.ClassName == "Part" then
 			child.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5)
@@ -9258,14 +9260,14 @@ addcmd('unweaken',{'unstrengthen'},function(args, speaker)
 	end
 end)
 
-addcmd('breakvelocity', {}, function(args, speaker)
+addcmd("breakvelocity", {}, function(args, speaker)
 	local BeenASecond, V3 = false, Vector3.new(0, 0, 0)
 	delay(1, function()
 		BeenASecond = true
 	end)
 	while not BeenASecond do
 		for _, v in ipairs(speaker.Character:GetDescendants()) do
-			if v.IsA(v, "BasePart") then
+			if v:IsA("BasePart") then
 				v.Velocity, v.RotVelocity = V3, V3
 			end
 		end
@@ -9284,22 +9286,22 @@ addcmd('jpower',{'jumppower','jp'},function(args, speaker)
 	end
 end)
 
-addcmd('maxslopeangle',{'msa'},function(args, speaker)
+addcmd("maxslopeangle", {"msa"}, function(args, speaker)
 	local sangle = args[1] or 89
 	if isNumber(sangle) then
-		speaker.Character:FindFirstChildOfClass('Humanoid').MaxSlopeAngle = sangle
+		speaker.Character:FindFirstChildWhichIsA("Humanoid").MaxSlopeAngle = sangle
 	end
 end)
 
-addcmd('gravity',{'grav'},function(args, speaker)
+addcmd("gravity", {"grav"}, function(args, speaker)
 	local grav = args[1] or 196.2
 	if isNumber(grav) then
 		workspace.Gravity = grav
 	end
 end)
 
-addcmd('hipheight',{'hheight'},function(args, speaker)
-	speaker.Character:FindFirstChildWhichIsA('Humanoid').HipHeight = args[1] or (r15(speaker) and 2.1 or 0)
+addcmd("hipheight", {"hheight"}, function(args, speaker)
+	speaker.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = args[1] or (r15(speaker) and 2.1 or 0)
 end)
 
 addcmd("dance", {}, function(args, speaker)
@@ -9462,7 +9464,7 @@ function noSitFunc()
 		Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Sit = false
 	end
 end
-addcmd('nosit',{},function(args, speaker)
+addcmd("nosit", {}, function(args, speaker)
 	if noSit then noSit:Disconnect() nositDied:Disconnect() end
 	noSit = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):GetPropertyChangedSignal("Sit"):Connect(noSitFunc)
 	local function nositDiedFunc()
@@ -9473,43 +9475,43 @@ addcmd('nosit',{},function(args, speaker)
 	nositDied = speaker.CharacterAdded:Connect(nositDiedFunc)
 end)
 
-addcmd('unnosit',{},function(args, speaker)
+addcmd("unnosit", {}, function(args, speaker)
 	if noSit then noSit:Disconnect() nositDied:Disconnect() end
 end)
 
-addcmd('jump',{},function(args, speaker)
-	speaker.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+addcmd("jump", {}, function(args, speaker)
+	speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 end)
 
 local infJump
-local infJumpDebounce = false
-addcmd('infjump',{'infinitejump'},function(args, speaker)
-    if infJump then infJump:Disconnect() end
-    infJumpDebounce = false
-    infJump = UserInputService.JumpRequest:Connect(function()
-        if not infJumpDebounce then
-            infJumpDebounce = true
-            speaker.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-            wait()
-            infJumpDebounce = false
-        end
-    end)
+infJumpDebounce = false
+addcmd("infjump", {"infinitejump"}, function(args, speaker)
+	if infJump then infJump:Disconnect() end
+	infJumpDebounce = false
+	infJump = UserInputService.JumpRequest:Connect(function()
+		if not infJumpDebounce then
+			infJumpDebounce = true
+			speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+			wait()
+			infJumpDebounce = false
+		end
+	end)
 end)
 
-addcmd('uninfjump',{'uninfinitejump','noinfjump','noinfinitejump'},function(args, speaker)
-    if infJump then infJump:Disconnect() end
-    infJumpDebounce = false
+addcmd("uninfjump", {"uninfinitejump", "noinfjump", "noinfinitejump"}, function(args, speaker)
+	if infJump then infJump:Disconnect() end
+	infJumpDebounce = false
 end)
 
 local flyjump
-addcmd('flyjump',{},function(args, speaker)
+addcmd("flyjump", {}, function(args, speaker)
 	if flyjump then flyjump:Disconnect() end
 	flyjump = UserInputService.JumpRequest:Connect(function()
 		speaker.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 	end)
 end)
 
-addcmd('unflyjump',{'noflyjump'},function(args, speaker)
+addcmd("unflyjump", {"noflyjump"}, function(args, speaker)
 	if flyjump then flyjump:Disconnect() end
 end)
 
@@ -10017,32 +10019,21 @@ end)
 
 addcmd('toolview',{},function(args, speaker)
 	local s, e = pcall(function()
-
                 local pl = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
-
                 if not pl then return notify("invalid argument passed") end
-
                 local t, chartool = {}, pl.Character:FindFirstChildOfClass("Tool")
 
-
-
                 for _, v in pl.Backpack:GetChildren() do
-
                     if not v:IsA("Tool") then continue end
-
                     table.insert(t, tostring(v))
-
                 end
-
                 
-
                 if chartool then 
-
                     notify(("%s's tools"):format(tostring(pl)), tostring(chartool).. ", " ..table.concat(t, ", "))
-
                 else
-
                     notify(("%s's tools"):format(tostring(pl)), table.concat(t, ", "))
+                end
+                end)
 end)
 
 addcmd('console',{},function(args, speaker)
@@ -10554,7 +10545,7 @@ addcmd('fireclickdetectors',{'firecd','firecds'}, function(args, speaker)
         if args[1] then
             local name = getstring(1)
             for _, descendant in ipairs(workspace:GetDescendants()) do
-                if descendant:IsA("ClickDetector") and descendant.Name == name then
+                if descendant:IsA("ClickDetector") and descendant.Name == name or descandant.Parent.Name == name then
                     fireclickdetector(descendant)
                 end
             end
@@ -10583,7 +10574,7 @@ addcmd('fireproximityprompts',{'firepp'},function(args, speaker)
         if args[1] then
             local name = getstring(1)
             for _, descendant in ipairs(workspace:GetDescendants()) do
-                if descendant:IsA("ProximityPrompt") and descendant.Name == name then
+                if descendant:IsA("ProximityPrompt") and descendant.Name == name or descandant.Parent.Name == name then
                     fireproximityprompt(descendant)
                 end
             end
@@ -11031,7 +11022,7 @@ addcmd('touchinterests', {'touchinterest', 'firetouchinterests', 'firetouchinter
     if args[1] then
         local name = getstring(1)
         for _, descendant in ipairs(workspace:GetDescendants()) do
-            if descendant:IsA("TouchTransmitter") and descendant.Name == name then
+            if descendant:IsA("TouchTransmitter") and descendant.Name == name or descandant.Parent.Name == name then
                 touch(descendant)
             end
         end
@@ -12188,6 +12179,32 @@ addcmd('removecmd',{'deletecmd'},function(args, speaker)
 	removecmd(args[1])
 end)
 
+if IsOnMobile then
+	local QuickCapture = Instance.new("TextButton")
+	local UICorner = Instance.new("UICorner")
+	QuickCapture.Name = randomString()
+	QuickCapture.Parent = PARENT
+	QuickCapture.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
+	QuickCapture.BackgroundTransparency = 0.14
+	QuickCapture.Position = UDim2.new(0.489, 0, 0, 0)
+	QuickCapture.Size = UDim2.new(0, 32, 0, 33)
+	QuickCapture.Font = Enum.Font.SourceSansBold
+	QuickCapture.Text = "IY"
+	QuickCapture.TextColor3 = Color3.fromRGB(255, 255, 255)
+	QuickCapture.TextSize = 20.000
+	QuickCapture.TextWrapped = true
+	QuickCapture.Draggable = true
+	UICorner.Name = randomString()
+	UICorner.CornerRadius = UDim.new(0.5, 0)
+	UICorner.Parent = QuickCapture
+	QuickCapture.MouseButton1Click:Connect(function()
+		Cmdbar:CaptureFocus()
+		maximizeHolder()
+	end)
+	table.insert(shade1, QuickCapture)
+	table.insert(text1, QuickCapture)
+end
+
 updateColors(currentShade1,shade1)
 updateColors(currentShade2,shade2)
 updateColors(currentShade3,shade3)
@@ -12416,4 +12433,5 @@ task.spawn(function()
 	Credits:Destroy()
 	IntroBackground:Destroy()
 	minimizeHolder()
+	if IsOnMobile then notify("Unstable Device", "On mobile, Infinite Yield may have issues or features that are not functioning correctly.") end
 end)
