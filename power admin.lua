@@ -10103,16 +10103,6 @@ local humanoid = character:WaitForChild("Humanoid")
                 humanoid.Died:Connect(function() tc:Disconnect() end)
 end)
 
-addcmd('unball',{},function(args, speaker)
-	ball.Shape = Enum.PartType.Block
-                ball.Size = Vector3.new(2,2,1)
-                ball.CanCollide = false
-		lolz = false
-		humanoid.PlatformStand = false
-		Camera.CameraSubject = humanoid
-		end
-end)
-
 addcmd('console',{},function(args, speaker)
 	-- Thanks wally!!
 	notify("Loading",'Hold on a sec')
