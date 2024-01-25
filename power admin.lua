@@ -10110,6 +10110,7 @@ addcmd('unball',{},function(args, speaker)
 		lolz = false
 		humanoid.PlatformStand = false
 		Camera.CameraSubject = humanoid
+		end
 end)
 
 addcmd('console',{},function(args, speaker)
