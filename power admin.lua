@@ -210,7 +210,7 @@ Title.Text = "Power Admin v" .. currentVersion
 
 do
 	local emoji = ({
-		["01 01"] = "🎆",
+		["01 01"] = "ðŸŽ†",
 		[(function(Year)
 			local A = math.floor(Year/100)
 			local B = math.floor((13+8*A)/25)
@@ -227,9 +227,9 @@ do
 				return ("04 %02d"):format(G-31)
 			end
 			return ("03 %02d"):format(G)
-		end)(tonumber(os.date"%Y"))] = "🥚",
-		["10 31"] = "🎃",
-		["12 25"] = "🎄"
+		end)(tonumber(os.date"%Y"))] = "ðŸ¥š",
+		["10 31"] = "ðŸŽƒ",
+		["12 25"] = "ðŸŽ„"
 	})[os.date("%m %d")]
 	if emoji then
 		Title.Text = ("%s %s %s"):format(emoji, Title.Text, emoji)
@@ -4249,8 +4249,10 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
-CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infinite Yield support server.'}
-CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'teste'}
+CMDs[#CMDs + 1] = {NAME = 'Better Admin', DESC = 'comandos de administradores'}
+CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
+CMDs[#CMDs + 1] = {NAME = 'ball', DESC = 'vire uma bola'}
+CMDs[#CMDs + 1] = {NAME = 'unball', DESC = 'desativa a bola'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads old Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
@@ -4631,7 +4633,6 @@ CMDs[#CMDs + 1] = {NAME = 'removeplugin / deleteplugin [name]', DESC = 'Remove a
 CMDs[#CMDs + 1] = {NAME = 'reloadplugin [name]', DESC = 'Reloads a plugin'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'breakloops / break (cmd loops)', DESC = 'Stops any cmd loops (;100^1^cmd)'}
-CMDs[#CMDs + 1] = {NAME = 'removecmd / deletecmd', DESC = 'Removes a command until the admin is reloaded'}
 CMDs[#CMDs + 1] = {NAME = 'tpwalk / teleportwalk [num]', DESC = 'Teleports you to your move direction'}
 CMDs[#CMDs + 1] = {NAME = 'untpwalk / unteleportwalk', DESC = 'Undoes tpwalk / teleportwalk'}
 CMDs[#CMDs + 1] = {NAME = 'notifyping / ping', DESC = 'Notify yourself your ping'}
@@ -4917,24 +4918,6 @@ function addcmd(name,alias,func,plgn)
 			FUNC=func;
 			PLUGIN=plgn;
 		}
-end
-
-function removecmd(cmd)
-	if cmd ~= " " then
-		for i = #cmds,1,-1 do
-			if cmds[i].NAME == cmd or FindInTable(cmds[i].ALIAS,cmd) then
-				table.remove(cmds, i)
-				for a,c in pairs(CMDsF:GetChildren()) do
-					if string.find(c.Text, "^"..cmd.."$") or string.find(c.Text, "^"..cmd.." ") or string.find(c.Text, " "..cmd.."$") or string.find(c.Text, " "..cmd.." ") then
-						c.TextTransparency = 0.7
-						c.MouseButton1Click:Connect(function()
-							notify(c.Text, "Command has been disabled by you or a plugin")
-						end)
-					end
-				end
-			end
-		end
-	end
 end
 
 function addbind(cmd,key,iskeyup,toggle)
@@ -10017,23 +10000,116 @@ addcmd('deleteselectedtool',{'dst'},function(args, speaker)
 	end
 end)
 
+addcmd('Better Admin',{},function(args, speaker)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/porrinha09/Hd-Admin/main/Better%20Admin/Better%20Admin.lua",true))()
+end)
+
 addcmd('toolview',{},function(args, speaker)
 	local s, e = pcall(function()
+
                 local pl = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
+
                 if not pl then return notify("invalid argument passed") end
+
                 local t, chartool = {}, pl.Character:FindFirstChildOfClass("Tool")
 
+
+
                 for _, v in pl.Backpack:GetChildren() do
+
                     if not v:IsA("Tool") then continue end
+
                     table.insert(t, tostring(v))
+
                 end
+
                 
+
                 if chartool then 
+
                     notify(("%s's tools"):format(tostring(pl)), tostring(chartool).. ", " ..table.concat(t, ", "))
+
                 else
+
                     notify(("%s's tools"):format(tostring(pl)), table.concat(t, ", "))
+
+                end
+
+                end)
+end)
+
+addcmd('ball',{},function(args, speaker)
+	local UserInputService = game:GetService("UserInputService")
+                lolz = true
+		local RunService = game:GetService("RunService")
+                
+                local SPEED_MULTIPLIER = 30
+                local JUMP_POWER = 60
+                local JUMP_GAP = 0.3
+                
+                local character = game.Players.LocalPlayer.Character
+                
+
+		ball.Shape = Enum.PartType.Ball
+ball.Size = Vector3.new(5,5,5)
+local humanoid = character:WaitForChild("Humanoid")
+
+                for i,v in ipairs(character:GetDescendants()) do
+                   if v:IsA("BasePart") then
+                       v.CanCollide = false
+                   end
+                end
+                local params = RaycastParams.new()
+                params.FilterType = Enum.RaycastFilterType.Blacklist
+                params.FilterDescendantsInstances = {character}
+                
+                local tc = RunService.RenderStepped:Connect(function(delta)
+                   if lolz == true then
+		ball.CanCollide = true
+                   humanoid.PlatformStand = true
+                if UserInputService:GetFocusedTextBox() then return end
+                if UserInputService:IsKeyDown("W") then
+                ball.RotVelocity -= Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("A") then
+                ball.RotVelocity -= Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("S") then
+                ball.RotVelocity += Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("D") then
+                ball.RotVelocity += Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+                end
+                --ball.RotVelocity = ball.RotVelocity - Vector3.new(0,ball.RotVelocity.Y/50,0)
+		end
+                end)
+                if lolz == true then
+                UserInputService.JumpRequest:Connect(function()
+                local result = workspace:Raycast(
+                ball.Position,
+                Vector3.new(
+                0,
+                -((ball.Size.Y/2)+JUMP_GAP),
+                0
+                ),
+                params
+                )
+                if result then
+                ball.Velocity = ball.Velocity + Vector3.new(0,JUMP_POWER,0)
                 end
                 end)
+                
+                Camera.CameraSubject = ball
+                humanoid.Died:Connect(function() tc:Disconnect() end)
+end)
+
+addcmd('unball',{},function(args, speaker)
+	ball.Shape = Enum.PartType.Block
+                ball.Size = Vector3.new(2,2,1)
+                ball.CanCollide = false
+		lolz = false
+		humanoid.PlatformStand = false
+		Camera.CameraSubject = humanoid
 end)
 
 addcmd('console',{},function(args, speaker)
@@ -12175,36 +12251,6 @@ addcmd('reloadplugin',{},function(args, speaker)
 	addPlugin(pluginName)
 end)
 
-addcmd('removecmd',{'deletecmd'},function(args, speaker)
-	removecmd(args[1])
-end)
-
-if IsOnMobile then
-	local QuickCapture = Instance.new("TextButton")
-	local UICorner = Instance.new("UICorner")
-	QuickCapture.Name = randomString()
-	QuickCapture.Parent = PARENT
-	QuickCapture.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
-	QuickCapture.BackgroundTransparency = 0.14
-	QuickCapture.Position = UDim2.new(0.489, 0, 0, 0)
-	QuickCapture.Size = UDim2.new(0, 32, 0, 33)
-	QuickCapture.Font = Enum.Font.SourceSansBold
-	QuickCapture.Text = "IY"
-	QuickCapture.TextColor3 = Color3.fromRGB(255, 255, 255)
-	QuickCapture.TextSize = 20.000
-	QuickCapture.TextWrapped = true
-	QuickCapture.Draggable = true
-	UICorner.Name = randomString()
-	UICorner.CornerRadius = UDim.new(0.5, 0)
-	UICorner.Parent = QuickCapture
-	QuickCapture.MouseButton1Click:Connect(function()
-		Cmdbar:CaptureFocus()
-		maximizeHolder()
-	end)
-	table.insert(shade1, QuickCapture)
-	table.insert(text1, QuickCapture)
-end
-
 updateColors(currentShade1,shade1)
 updateColors(currentShade2,shade2)
 updateColors(currentShade3,shade3)
@@ -12433,5 +12479,4 @@ task.spawn(function()
 	Credits:Destroy()
 	IntroBackground:Destroy()
 	minimizeHolder()
-	if IsOnMobile then notify("Unstable Device", "On mobile, Infinite Yield may have issues or features that are not functioning correctly.") end
 end)
