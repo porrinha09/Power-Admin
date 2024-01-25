@@ -4252,7 +4252,6 @@ CMDs = {}
 CMDs[#CMDs + 1] = {NAME = 'Better Admin', DESC = 'comandos de administradores'}
 CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
 CMDs[#CMDs + 1] = {NAME = 'ball', DESC = 'vire uma bola'}
-CMDs[#CMDs + 1] = {NAME = 'unball', DESC = 'desativa a bola'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads old Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
