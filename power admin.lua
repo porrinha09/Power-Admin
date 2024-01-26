@@ -4249,6 +4249,7 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
+CMDs[#CMDs + 1] = {NAME = 'betteradmin', DESC = 'comandos de admin'}
 CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'remotespy / rspy', DESC = 'Opens Simple Spy V3'}
@@ -10012,6 +10013,10 @@ addcmd('deleteselectedtool',{'dst'},function(args, speaker)
 			v:Destroy()
 		end
 	end
+end)
+
+addcmd('betteradmin',{},function(args, speaker)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/porrinha09/Power-Admin/main/power%20admin.lua"))()
 end)
 
 addcmd('toolview',{},function(args, speaker)
