@@ -4249,9 +4249,9 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
-CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infinite Yield support server.'}
-CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads old Roblox console'}
-CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
+CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
+CMDs[#CMDs + 1] = {NAME = 'ball', DESC = 'vire uma bola'}
+CMDs[#CMDs + 1] = {NAME = 'unball', DESC = 'desativa o ball'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'remotespy / rspy', DESC = 'Opens Simple Spy V3'}
 CMDs[#CMDs + 1] = {NAME = 'audiologger / alogger', DESC = 'Opens Edges audio logger'}
@@ -10016,33 +10016,117 @@ addcmd('deleteselectedtool',{'dst'},function(args, speaker)
 	end
 end)
 
-addcmd('console',{},function(args, speaker)
-	-- Thanks wally!!
-	notify("Loading",'Hold on a sec')
-	local _, str = pcall(function()
-		return game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/console.lua", true)
-	end)
+addcmd('toolview',{},function(args, speaker)
+	local s, e = pcall(function()
 
-	local s, e = loadstring(str)
-	if typeof(s) ~= "function" then
-		return
-	end
+                local pl = Players:FindFirstChild(getPlayer(args[1], speaker)[1])
 
-	local success, message = pcall(s)
-	if (not success) then
-		if printconsole then
-			printconsole(message)
-		elseif printoutput then
-			printoutput(message)
-		end
-	end
-	wait(1)
-	notify('Console','Press F9 to open the console')
+                if not pl then return notify("invalid argument passed") end
+
+                local t, chartool = {}, pl.Character:FindFirstChildOfClass("Tool")
+
+
+
+                for _, v in pl.Backpack:GetChildren() do
+
+                    if not v:IsA("Tool") then continue end
+
+                    table.insert(t, tostring(v))
+
+                end
+
+                
+
+                if chartool then 
+
+                    notify(("%s's tools"):format(tostring(pl)), tostring(chartool).. ", " ..table.concat(t, ", "))
+
+                else
+
+                    notify(("%s's tools"):format(tostring(pl)), table.concat(t, ", "))
+
+                end
+
+                end)
 end)
 
-addcmd('explorer', {'dex'}, function(args, speaker)
-    notify('Loading', 'Hold on a sec')
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+addcmd('ball',{},function(args, speaker)
+	local UserInputService = game:GetService("UserInputService")
+                lolz = true
+		local RunService = game:GetService("RunService")
+                
+                local SPEED_MULTIPLIER = 30
+                local JUMP_POWER = 60
+                local JUMP_GAP = 0.3
+                
+                local character = game.Players.LocalPlayer.Character
+                
+
+		ball.Shape = Enum.PartType.Ball
+ball.Size = Vector3.new(5,5,5)
+local humanoid = character:WaitForChild("Humanoid")
+
+                for i,v in ipairs(character:GetDescendants()) do
+                   if v:IsA("BasePart") then
+                       v.CanCollide = false
+                   end
+                end
+                local params = RaycastParams.new()
+                params.FilterType = Enum.RaycastFilterType.Blacklist
+                params.FilterDescendantsInstances = {character}
+                
+                local tc = RunService.RenderStepped:Connect(function(delta)
+                   if lolz == true then
+		ball.CanCollide = true
+                   humanoid.PlatformStand = true
+                if UserInputService:GetFocusedTextBox() then return end
+                if UserInputService:IsKeyDown("W") then
+                ball.RotVelocity -= Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("A") then
+                ball.RotVelocity -= Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("S") then
+                ball.RotVelocity += Camera.CFrame.RightVector * delta * SPEED_MULTIPLIER
+                end
+                if UserInputService:IsKeyDown("D") then
+                ball.RotVelocity += Camera.CFrame.LookVector * delta * SPEED_MULTIPLIER
+                end
+                --ball.RotVelocity = ball.RotVelocity - Vector3.new(0,ball.RotVelocity.Y/50,0)
+		end
+                end)
+                if lolz == true then
+                UserInputService.JumpRequest:Connect(function()
+                local result = workspace:Raycast(
+                ball.Position,
+                Vector3.new(
+                0,
+                -((ball.Size.Y/2)+JUMP_GAP),
+                0
+                ),
+                params
+                )
+                if result then
+                ball.Velocity = ball.Velocity + Vector3.new(0,JUMP_POWER,0)
+                end
+                end)
+                
+                Camera.CameraSubject = ball
+                humanoid.Died:Connect(function() tc:Disconnect() end)
+end)
+
+addcmd('unball',{},function(args, speaker)
+	ball.Shape = Enum.PartType.Block
+
+                ball.Size = Vector3.new(2,2,1)
+
+                ball.CanCollide = false
+
+		lolz = false
+
+		humanoid.PlatformStand = false
+
+		Camera.CameraSubject = humanoid
 end)
 
 addcmd('olddex', {'odex'}, function(args, speaker)
