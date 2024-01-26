@@ -210,7 +210,7 @@ Title.Text = "Power Admin v" .. currentVersion
 
 do
 	local emoji = ({
-		["01 01"] = "🎆",
+		["01 01"] = "ðŸŽ†",
 		[(function(Year)
 			local A = math.floor(Year/100)
 			local B = math.floor((13+8*A)/25)
@@ -227,9 +227,9 @@ do
 				return ("04 %02d"):format(G-31)
 			end
 			return ("03 %02d"):format(G)
-		end)(tonumber(os.date"%Y"))] = "🥚",
-		["10 31"] = "🎃",
-		["12 25"] = "🎄"
+		end)(tonumber(os.date"%Y"))] = "ðŸ¥š",
+		["10 31"] = "ðŸŽƒ",
+		["12 25"] = "ðŸŽ„"
 	})[os.date("%m %d")]
 	if emoji then
 		Title.Text = ("%s %s %s"):format(emoji, Title.Text, emoji)
@@ -4249,6 +4249,7 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
+CMDs[#CMDs + 1] = {NAME = 'betteradmin', DESC = 'comandos de administradores'}
 CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
 CMDs[#CMDs + 1] = {NAME = 'ball', DESC = 'vire uma bola'}
 CMDs[#CMDs + 1] = {NAME = 'unball', DESC = 'desativa o ball'}
@@ -4630,7 +4631,6 @@ CMDs[#CMDs + 1] = {NAME = 'removeplugin / deleteplugin [name]', DESC = 'Remove a
 CMDs[#CMDs + 1] = {NAME = 'reloadplugin [name]', DESC = 'Reloads a plugin'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'breakloops / break (cmd loops)', DESC = 'Stops any cmd loops (;100^1^cmd)'}
-CMDs[#CMDs + 1] = {NAME = 'removecmd / deletecmd', DESC = 'Removes a command until the admin is reloaded'}
 CMDs[#CMDs + 1] = {NAME = 'tpwalk / teleportwalk [num]', DESC = 'Teleports you to your move direction'}
 CMDs[#CMDs + 1] = {NAME = 'untpwalk / unteleportwalk', DESC = 'Undoes tpwalk / teleportwalk'}
 CMDs[#CMDs + 1] = {NAME = 'notifyping / ping', DESC = 'Notify yourself your ping'}
@@ -4916,24 +4916,6 @@ function addcmd(name,alias,func,plgn)
 			FUNC=func;
 			PLUGIN=plgn;
 		}
-end
-
-function removecmd(cmd)
-	if cmd ~= " " then
-		for i = #cmds,1,-1 do
-			if cmds[i].NAME == cmd or FindInTable(cmds[i].ALIAS,cmd) then
-				table.remove(cmds, i)
-				for a,c in pairs(CMDsF:GetChildren()) do
-					if string.find(c.Text, "^"..cmd.."$") or string.find(c.Text, "^"..cmd.." ") or string.find(c.Text, " "..cmd.."$") or string.find(c.Text, " "..cmd.." ") then
-						c.TextTransparency = 0.7
-						c.MouseButton1Click:Connect(function()
-							notify(c.Text, "Command has been disabled by you or a plugin")
-						end)
-					end
-				end
-			end
-		end
-	end
 end
 
 function addbind(cmd,key,iskeyup,toggle)
@@ -10129,6 +10111,35 @@ addcmd('unball',{},function(args, speaker)
 		Camera.CameraSubject = humanoid
 end)
 
+addcmd('console',{},function(args, speaker)
+	-- Thanks wally!!
+	notify("Loading",'Hold on a sec')
+	local _, str = pcall(function()
+		return game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/console.lua", true)
+	end)
+
+	local s, e = loadstring(str)
+	if typeof(s) ~= "function" then
+		return
+	end
+
+	local success, message = pcall(s)
+	if (not success) then
+		if printconsole then
+			printconsole(message)
+		elseif printoutput then
+			printoutput(message)
+		end
+	end
+	wait(1)
+	notify('Console','Press F9 to open the console')
+end)
+
+addcmd('explorer', {'dex'}, function(args, speaker)
+    notify('Loading', 'Hold on a sec')
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+end)
+
 addcmd('olddex', {'odex'}, function(args, speaker)
     notify('Loading old explorer', 'Hold on a sec')
     
@@ -12238,36 +12249,6 @@ addcmd('reloadplugin',{},function(args, speaker)
 	wait(1)
 	addPlugin(pluginName)
 end)
-
-addcmd('removecmd',{'deletecmd'},function(args, speaker)
-	removecmd(args[1])
-end)
-
-if IsOnMobile then
-	local QuickCapture = Instance.new("TextButton")
-	local UICorner = Instance.new("UICorner")
-	QuickCapture.Name = randomString()
-	QuickCapture.Parent = PARENT
-	QuickCapture.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
-	QuickCapture.BackgroundTransparency = 0.14
-	QuickCapture.Position = UDim2.new(0.489, 0, 0, 0)
-	QuickCapture.Size = UDim2.new(0, 32, 0, 33)
-	QuickCapture.Font = Enum.Font.SourceSansBold
-	QuickCapture.Text = "IY"
-	QuickCapture.TextColor3 = Color3.fromRGB(255, 255, 255)
-	QuickCapture.TextSize = 20.000
-	QuickCapture.TextWrapped = true
-	QuickCapture.Draggable = true
-	UICorner.Name = randomString()
-	UICorner.CornerRadius = UDim.new(0.5, 0)
-	UICorner.Parent = QuickCapture
-	QuickCapture.MouseButton1Click:Connect(function()
-		Cmdbar:CaptureFocus()
-		maximizeHolder()
-	end)
-	table.insert(shade1, QuickCapture)
-	table.insert(text1, QuickCapture)
-end
 
 updateColors(currentShade1,shade1)
 updateColors(currentShade2,shade2)
