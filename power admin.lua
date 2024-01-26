@@ -4249,9 +4249,10 @@ function autoComplete(str,curText)
 end
 
 CMDs = {}
-CMDs[#CMDs + 1] = {NAME = 'Better Admin', DESC = 'comandos de administradores'}
+CMDs[#CMDs + 1] = {NAME = 'betteradmin', DESC = 'comandos de administradores'}
 CMDs[#CMDs + 1] = {NAME = 'toolview', DESC = 'veja os itens das pessoas'}
 CMDs[#CMDs + 1] = {NAME = 'ball', DESC = 'vire uma bola'}
+CMDs[#CMDs + 1] = {NAME = 'unball', DESC = 'desativa o ball'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads old Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
 CMDs[#CMDs + 1] = {NAME = 'olddex / odex', DESC = 'Opens Old DEX by Moon'}
@@ -9999,7 +10000,7 @@ addcmd('deleteselectedtool',{'dst'},function(args, speaker)
 	end
 end)
 
-addcmd('Better Admin',{},function(args, speaker)
+addcmd('betteradmin',{},function(args, speaker)
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/porrinha09/Hd-Admin/main/Better%20Admin/Better%20Admin.lua",true))()
 end)
 
@@ -10100,6 +10101,15 @@ local humanoid = character:WaitForChild("Humanoid")
                 
                 Camera.CameraSubject = ball
                 humanoid.Died:Connect(function() tc:Disconnect() end)
+end)
+
+addcmd('unball',{},function(args, speaker)
+	ball.Shape = Enum.PartType.Block
+                ball.Size = Vector3.new(2,2,1)
+                ball.CanCollide = false
+		lolz = false
+		humanoid.PlatformStand = false
+		Camera.CameraSubject = humanoid
 end)
 
 addcmd('console',{},function(args, speaker)
