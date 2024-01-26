@@ -10000,10 +10000,6 @@ addcmd('deleteselectedtool',{'dst'},function(args, speaker)
 	end
 end)
 
-addcmd('betteradmin',{},function(args, speaker)
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/porrinha09/Hd-Admin/main/Better%20Admin/Better%20Admin.lua",true))()
-end)
-
 addcmd('toolview',{},function(args, speaker)
 	local s, e = pcall(function()
 
@@ -10105,10 +10101,15 @@ end)
 
 addcmd('unball',{},function(args, speaker)
 	ball.Shape = Enum.PartType.Block
+
                 ball.Size = Vector3.new(2,2,1)
+
                 ball.CanCollide = false
+
 		lolz = false
+
 		humanoid.PlatformStand = false
+
 		Camera.CameraSubject = humanoid
 end)
 
